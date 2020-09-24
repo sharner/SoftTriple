@@ -131,6 +131,13 @@ def main():
     print('Recall@1, 2, 4, 8: {recall[0]:.3f}, {recall[1]:.3f}, {recall[2]:.3f}, {recall[3]:.3f}; NMI: {nmi:.3f} \n'
                   .format(recall=recall, nmi=nmi))
 
+    # Save the model
+    print("Saving model!")
+    fn = "{}.pt".format("n_plus_1")
+    torch.save(model, fn)
+    print("Model saved to", fn)
+
+
 
 def train(train_loader, model, criterion, optimizer, args):
     # switch to train mode

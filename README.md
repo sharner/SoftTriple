@@ -1,4 +1,6 @@
+
 # SoftTriple Loss
+
 PyTorch Implementation for Our ICCV'19 Paper: "SoftTriple Loss: Deep Metric Learning Without Triplet Sampling"
 
 ## Usage: Train on Cars196
@@ -41,3 +43,34 @@ If you use the package in your research, please cite our paper:
   year      = {2019}
 }
 ```
+
+## Building the Container (SJH)
+
+```{sh}
+docker build -t soft-triple:latest .
+```
+
+## Set up for training
+
+Get the training file from GS_RESULTS.
+
+```{sh}
+unzip n1model.zip && mv pklfiles train
+```
+
+Place some of the classes in test:
+
+```{sh}
+mkdir test
+mv train/<choose some directories> test
+```
+
+## Train
+
+Start the training job. Start it on GPU 1 so that GPU 0 is available for other things.
+
+```{sh}
+NUM_CLASSES=$(ls -1 train | wc -l)
+python train.py --batch-size 128 --gpu 1 --dim 512 -C $NUM_CLASSES --freeze_BN .
+```
+
