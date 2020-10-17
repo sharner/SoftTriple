@@ -487,7 +487,7 @@ class BNInception(nn.Module):
     def forward(self, input):
         x = self.features(input)
         adaptiveAvgPoolWidth = x.shape[2]
-        x = F.avg_pool2d(x, kernel_size=adaptiveAvgPoolWidth)
+        x = F.avg_pool2d(x, kernel_size=int(adaptiveAvgPoolWidth))
         x = x.view(x.size(0), -1)
         x = self.embedding(x)
         x = F.normalize(x, p=2, dim=1)

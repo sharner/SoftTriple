@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/pytorch:19.10-py3
+FROM nvcr.io/nvidia/pytorch:20.09-py3
 
 COPY . /workspace
 

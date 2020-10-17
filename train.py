@@ -23,6 +23,7 @@ from PIL import Image
 import loss
 import evaluation as eva
 import net
+import export
 
 
 parser = argparse.ArgumentParser(description='PyTorch Training')
@@ -78,6 +79,7 @@ def main():
     model = net.bninception(args.dim)
     torch.cuda.set_device(args.gpu)
     model = model.cuda()
+    # model = torch.nn.DataParallel(model)
 
     # define loss function (criterion) and optimizer
     criterion = loss.SoftTriple(args.la, args.gamma, args.tau, args.margin, args.dim, args.C, args.K).cuda()
@@ -132,11 +134,7 @@ def main():
                   .format(recall=recall, nmi=nmi))
 
     # Save the model
-    print("Saving model!")
-    fn = "{}.pt".format("n_plus_1")
-    torch.save(model, fn)
-    print("Model saved to", fn)
-
+    export.save_torch(model, "spd_n1")
 
 
 def train(train_loader, model, criterion, optimizer, args):
