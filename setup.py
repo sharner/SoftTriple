@@ -6,12 +6,12 @@ setup(
     version='0.0.0',
     description='SoftTriple network',
     author = 'Soren Harner',
-    packages=['retinanet', 'retinanet.backbones'],
+    packages=['softtriple'],
     ext_modules=[],
     cmdclass={'build_ext': BuildExtension.with_options(no_python_abi_suffix=True)},
     install_requires=[
         'torch>=1.0.0a0',
         'torchvision'    
     ],
-    entry_points = {'console_scripts': ['softtriple=retinanet.main:main']}
+    entry_points = {'console_scripts': ['softtriple=softtriple.train:main']}
 )
