@@ -79,7 +79,7 @@ def main():
     model = net.bninception(args.dim)
     torch.cuda.set_device(args.gpu)
     model = model.cuda()
-    # model = torch.nn.DataParallel(model)
+    model = torch.nn.DataParallel(model)
 
     # define loss function (criterion) and optimizer
     criterion = loss.SoftTriple(args.la, args.gamma, args.tau, args.margin, args.dim, args.C, args.K).cuda()
@@ -134,7 +134,7 @@ def main():
                   .format(recall=recall, nmi=nmi))
 
     # Save the model
-    export.save_torch(model, "spd_n1")
+    export.save_torch(model.module, "spd_n1")
 
 
 def train(train_loader, model, criterion, optimizer, args):
