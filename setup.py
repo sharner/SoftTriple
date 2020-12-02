@@ -10,10 +10,10 @@ setup(
     ext_modules=[],
     cmdclass={'build_ext': BuildExtension.with_options(no_python_abi_suffix=True)},
     install_requires=[
-        'torch>=1.0.0a0',
-        'torchvision',
-        'natsort',
-        'pyarrow==1.0.1'
+        'torch==1.7.0',
+        'torchvision==0.8.0',
+        'natsort==7.1.0',
+        'pyarrow==2.0.0'
     ],
     entry_points = {'console_scripts': ['softtriple=softtriple.train:main']}
 )
