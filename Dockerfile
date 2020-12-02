@@ -5,5 +5,6 @@ RUN git clone --recurse-submodules https://github.com/onnx/onnx-tensorrt.git \
     && cmake .. && make install \
     && cd ../.. && rm -rf onnx-tensorrt
 
-COPY . /workspace
-RUN pip install --no-cache-dir -e softriple/
+COPY . /SoftTriple
+RUN cd /SoftTriple && \
+    pip install --no-cache-dir -e .

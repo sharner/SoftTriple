@@ -11,7 +11,9 @@ setup(
     cmdclass={'build_ext': BuildExtension.with_options(no_python_abi_suffix=True)},
     install_requires=[
         'torch>=1.0.0a0',
-        'torchvision'    
+        'torchvision',
+        'natsort',
+        'pyarrow==1.0.1'
     ],
     entry_points = {'console_scripts': ['softtriple=softtriple.train:main']}
 )

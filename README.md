@@ -47,7 +47,7 @@ If you use the package in your research, please cite our paper:
 ## Building the Container (SJH)
 
 ```{sh}
-docker build -t soft-triple:latest .
+docker build -t soft-triple-n1:latest .
 ```
 
 ## Set up for training

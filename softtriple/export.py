@@ -15,7 +15,7 @@ import tensorrt as trt
 
 def load_model(model_checkpoint: str) -> nn.Module:
     model = torch.load(model_checkpoint)
-    # model.cuda(0)
+    model.cuda(0)
     model.eval()
     return model
 
@@ -23,7 +23,6 @@ def load_resnet():
     return models.resnet50(pretrained=True)
 
 def save_torch(model, base_name):
-    save_pytorch(model)
     print("Saving model!")
     fn = "{}.pth".format(base_name)
     torch.save(model, fn)
