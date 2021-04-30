@@ -34,7 +34,7 @@ def onnx_export(model: nn.Module, fn: str):
     dummy_input = torch.randn(1, 3, 224, 224)
     dummy_input = dummy_input.cuda(0)
     print(dummy_input.shape)
-    torch.onnx.export(model.module, dummy_input, fn,
+    torch.onnx.export(model, dummy_input, fn,
                       verbose=True,
                       input_names=['input'], output_names=['output'],
                       export_params=True)

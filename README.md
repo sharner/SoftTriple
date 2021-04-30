@@ -70,7 +70,17 @@ mv train/<choose some directories> test
 Start the training job. Start it on GPU 1 so that GPU 0 is available for other things.
 
 ```{sh}
-NUM_CLASSES=$(ls -1 train | wc -l)
-python train.py --batch-size 128 --gpu 1 --dim 512 -C $NUM_CLASSES --freeze_BN .
+cd /layerjot/SoftTriple/softtriple
+DATASET=/data/office_dataset # Use the office_dataset | lpch_dataset
+NUM_CLASSES=$(ls -1 ${DATASET}/train | wc -l)
+python lj_train.py  --batch-size 128 --gpu 1 --dim 512 -C $NUM_CLASSES --freeze_BN ${DATASET}
 ```
 
+## Results
+
+With Tila as test set.
+
+office_set_105 eval on 
+Recall@1, 2, 4, 8: 0.518, 0.694, 0.888, 0.965; NMI: 0.630
+
+office_set_105

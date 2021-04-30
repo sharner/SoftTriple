@@ -5,6 +5,7 @@ import numpy as np
 
 def evaluation(X, Y, Kset):
     num = X.shape[0]
+    # It would be better to use the count of unique values of Y
     classN = np.max(Y)+1
     kmax = np.max(Kset)
     recallK = np.zeros(len(Kset))
