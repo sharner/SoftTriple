@@ -16,7 +16,8 @@ setup(
         'pyarrow==2.0.0',
         'efficientnet_pytorch==0.7.1',
         'efficientnet-lite-pytorch==0.1.0',
-        'efficientnet-lite0-pytorch-model==0.1.0'
+        'efficientnet-lite0-pytorch-model==0.1.0',
+        'efficientnet-lite2-pytorch-model==0.1.0'
     ],
     entry_points = {'console_scripts': ['softtriple=softtriple.train:main']}
 )

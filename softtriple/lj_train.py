@@ -19,7 +19,8 @@ import torch.utils.data.distributed
 from torchvision import transforms, datasets, models
 # from efficientnet_pytorch import EfficientNet
 from efficientnet_lite_pytorch import EfficientNet
-from efficientnet_lite0_pytorch_model import EfficientnetLite0ModelFile
+# from efficientnet_lite0_pytorch_model import EfficientnetLite0ModelFile
+from efficientnet_lite2_pytorch_model import EfficientnetLite2ModelFile
 
 import torch.nn as nn
 from PIL import Image
@@ -87,8 +88,10 @@ def make_resnet(dims):
     elif True:
         # Try with efficientnet lite as well: https://github.com/lukemelas/EfficientNet-PyTorch
         # model_ft = EfficientNet.from_pretrained("efficientnet-b7", dims)
-        weights_path = EfficientnetLite0ModelFile.get_model_file_path()
-        model_ft = EfficientNet.from_pretrained('efficientnet-lite0', weights_path = weights_path )
+        weights_path = EfficientnetLite2ModelFile.get_model_file_path()
+        backbone = 'efficientnet-lite0'
+        backbone = 'efficientnet-lite2'
+        model_ft = EfficientNet.from_pretrained(backbone, weights_path = weights_path )
         num_ftrs = model_ft._fc.in_features
         model_ft._fc = nn.Linear(num_ftrs, dims)
     else:
