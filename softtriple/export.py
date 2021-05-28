@@ -34,10 +34,16 @@ def onnx_export(model: nn.Module, fn: str):
     dummy_input = torch.randn(1, 3, 224, 224)
     dummy_input = dummy_input.cuda(0)
     print(dummy_input.shape)
-    torch.onnx.export(model, dummy_input, fn,
+    # SJH: Needed to export EffNetB7 https://github.com/lukemelas/EfficientNet-PyTorch/issues/91
+    # model.module.set_swish(memory_efficient=False)
+    # SJH: use model when not trained with DataParallel iterator
+    # SJH: the EffNet model needs opset 12 but BNInception needs opcode 10
+    torch.onnx.export(model.module, dummy_input, fn,
                       verbose=True,
                       input_names=['input'], output_names=['output'],
+                      opset_version=10,
                       export_params=True)
+    print('Exported model', fn)
 
 def test_onnx_model(fn: str):
     onnx_model = onnx.load(fn)

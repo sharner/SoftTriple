@@ -17,7 +17,7 @@ import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
 from torchvision import transforms, datasets, models
-# from efficientnet_pytorch import EfficientNet
+from efficientnet_pytorch import EfficientNet
 from efficientnet_lite_pytorch import EfficientNet
 # from efficientnet_lite0_pytorch_model import EfficientnetLite0ModelFile
 from efficientnet_lite2_pytorch_model import EfficientnetLite2ModelFile
@@ -67,6 +67,9 @@ parser.add_argument('-C', default=98, type=int,
                     help='C')
 parser.add_argument('-K', default=10, type=int,
                     help='K')
+parser.add_argument('--backbone', default='BN-Inception', type=str,
+                    help='type of model to use: "resnet" for Resnet152, "mobilenet" for Mobilenet_v2, "efficientb7" + "efficientb0" for Efficient Net B0 and B7, "efficientlite" for Efficient Net Lite')
+
 
 
 def RGB2BGR(im):
@@ -74,10 +77,16 @@ def RGB2BGR(im):
     r, g, b = im.split()
     return Image.merge('RGB', (b, g, r))
 
-def make_resnet(dims):
-    if False:
-        # model_ft = torch.hub.load('pytorch/vision:v0.8.0', 'mobilenet_v2', pretrained=True)
-        model_ft = EfficientNet.from_pretrained("efficientnet-b0", advprop=True)
+def make_backbone(dims, backbone):
+    if backbone == 'resnet':
+        # model_ft = models.resnet18(pretrained=True)
+        # model_ft = models.resnet50(pretrained=True)
+        # model_ft = models.resnet101(pretrained=True)
+        model_ft = models.resnet152(pretrained=True)
+        num_ftrs = model_ft.fc.in_features
+        model_ft.fc = nn.Linear(num_ftrs, dims)
+    elif backbone == "mobilenet":
+        model_ft = torch.hub.load('pytorch/vision:v0.8.0', 'mobilenet_v2', pretrained=True)
         # SJH try this one? https://pytorch.org/tutorials/recipes/model_preparation_ios.html#get-pretrained-and-quantized-mobilenet-v2-model
 
         # SJH: Is there something magic about their bn-inception model or will inception_v3 work just as well?
@@ -85,36 +94,48 @@ def make_resnet(dims):
 
         num_ftrs = model_ft.last_channel
         model_ft.classifier = nn.Linear(num_ftrs, dims)
-    elif True:
+    elif 'efficient' in backbone:
+        if 'lite' in backbone:
+            weights_path = EfficientnetLite2ModelFile.get_model_file_path()
+            backb = 'efficientnet-lite0'
+            backb = 'efficientnet-lite2'
+            model_ft = EfficientNet.from_pretrained(backb, weights_path = weights_path )
+            num_ftrs = model_ft._fc.in_features
+            model_ft._fc = nn.Linear(num_ftrs, dims)
         # Try with efficientnet lite as well: https://github.com/lukemelas/EfficientNet-PyTorch
-        # model_ft = EfficientNet.from_pretrained("efficientnet-b7", dims)
-        weights_path = EfficientnetLite2ModelFile.get_model_file_path()
-        backbone = 'efficientnet-lite0'
-        backbone = 'efficientnet-lite2'
-        model_ft = EfficientNet.from_pretrained(backbone, weights_path = weights_path )
-        num_ftrs = model_ft._fc.in_features
-        model_ft._fc = nn.Linear(num_ftrs, dims)
+        if "b7" in backbone:
+            model_ft = EfficientNet.from_pretrained("efficientnet-b7", dims)
+            
+            num_ftrs = model_ft._fc.in_features
+            model_ft._fc = nn.Linear(num_ftrs, dims)
+        if "b0" in backbone:
+            model_ft = EfficientNet.from_pretrained("efficientnet-b0", dims)
+            num_ftrs = model_ft._fc.in_features
+            model_ft._fc = nn.Linear(num_ftrs, dims)
     else:
-        # model_ft = models.resnet18(pretrained=True)
-        # model_ft = models.resnet50(pretrained=True)
-        # model_ft = models.resnet101(pretrained=True)
-        model_ft = models.resnet152(pretrained=True)
-        num_ftrs = model_ft.fc.in_features
-        model_ft.fc = nn.Linear(num_ftrs, dims)
+        # for BN-Inception, default
+        model_ft = net.bninception(dims)
+        
     return model_ft
+
 
 def main():
     args = parser.parse_args()
 
     # create model
-    # model = net.bninception(args.dim)
-    model = make_resnet(args.dim)
+    print("Training model with backbone", args.backbone)
+    model = make_backbone(args.dim, args.backbone)
 
     # SJH: uncomment to run on a selected GPU
-    # torch.cuda.set_device(args.gpu)
+    # 
+    b = True
+    if args.backbone == "mobilenet": # mobilenet
+        torch.cuda.set_device(args.gpu)
+        b = False
     model = model.cuda()
     # SJH: uncomment to run on multiple GPUs - works for ResNet not MobileNet
-    model = torch.nn.DataParallel(model)
+    if b is True: # false for mobilenet
+        model = torch.nn.DataParallel(model)
 
     # define loss function (criterion) and optimizer
     criterion = loss.SoftTriple(args.la, args.gamma, args.tau, args.margin, args.dim, args.C, args.K).cuda()
@@ -128,16 +149,31 @@ def main():
     testdir = os.path.join(args.data, 'test')
 
     # Use this with BN-Inception
-    # normalize = transforms.Normalize(mean=[104., 117., 128.],
-    #                                  std=[1., 1., 1.])
+    if args.backbone == "BN-Inception":
+        normalize = transforms.Normalize(mean=[104., 117., 128.],
+                                        std=[1., 1., 1.])
     # SJH for ResNet and EfficientNet
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+    else:
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
     # For EfficientNet with advprop
     # normalize = transforms.Lambda(lambda img: img * 2.0 - 1.0)
 
-    train_dataset = datasets.ImageFolder(
+    if args.backbone == "BN-Inception":
+        train_dataset = datasets.ImageFolder(
+            traindir,
+            transforms.Compose([
+                transforms.Lambda(RGB2BGR), # SJH BN-Inception is BGR
+                transforms.RandomResizedCrop(224),  # SJH was 224 for bn-inception and mobilenet and 299 for pytorch inception
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Lambda(lambda x: x.mul(255)), # SJH BN-Inception needs scale
+                normalize,
+            ]))
+
+    else:
+        train_dataset = datasets.ImageFolder(
         traindir,
         transforms.Compose([
             # transforms.Lambda(RGB2BGR), # SJH BN-Inception is BGR
@@ -152,18 +188,30 @@ def main():
         train_dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True)
 
-    test_loader = torch.utils.data.DataLoader(
+    if args.backbone == "BN-Inception":
+        test_loader = torch.utils.data.DataLoader(
+            datasets.ImageFolder(testdir, transforms.Compose([
+                transforms.Lambda(RGB2BGR),
+                transforms.Resize(256), # SJH Was 256 for mobilenet and bn-inception and 299 for pytorch inception
+                transforms.CenterCrop(224), # SJH was 224
+                transforms.ToTensor(),
+                transforms.Lambda(lambda x: x.mul(255)), # SJH BN-Inception needs scale
+                normalize,
+            ])),
+            batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True)
+    else:
+        test_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(testdir, transforms.Compose([
-            # transforms.Lambda(RGB2BGR),
             transforms.Resize(256), # SJH Was 256 for mobilenet and bn-inception and 299 for pytorch inception
             transforms.CenterCrop(224), # SJH was 224
             transforms.ToTensor(),
-            # transforms.Lambda(lambda x: x.mul(255)), # SJH BN-Inception needs scale
             normalize,
         ])),
         batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True)
 
+    best_nmi = 0
     for epoch in range(args.start_epoch, args.epochs):
         print('Training in Epoch[{}]'.format(epoch))
         adjust_learning_rate(optimizer, epoch, args)
@@ -175,6 +223,14 @@ def main():
         nmi, recall = validate(test_loader, model, args)
         print('Recall@1, 2, 4, 8: {recall[0]:.3f}, {recall[1]:.3f}, {recall[2]:.3f}, {recall[3]:.3f}; NMI: {nmi:.3f} \n'
                   .format(recall=recall, nmi=nmi))
+        
+        # Save the best model
+        if nmi > best_nmi:
+            best_nmi = nmi
+            print("Saving new best model!")
+            fn = "{}.pth".format(f"best_model_{epoch}_eflite")
+            torch.save(model, fn)
+            print("Model saved to", fn)
 
     # evaluate on validation set
     nmi, recall = validate(test_loader, model, args)
@@ -183,7 +239,7 @@ def main():
 
     # Save the model
     print("Saving model!")
-    fn = "{}.pth".format("lpch-office-kaiser_n1")
+    fn = "{}.pth".format("last_model_eflite")
     torch.save(model, fn)
     print("Model saved to", fn)
 
@@ -191,6 +247,7 @@ def main():
 
 def train(train_loader, model, criterion, optimizer, args):
     # switch to train mode
+
     model.train()
     if args.freeze_BN:
         for m in model.modules():
