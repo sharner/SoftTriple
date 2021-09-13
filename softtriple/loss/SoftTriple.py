@@ -10,12 +10,12 @@ from torch.nn import init
 class SoftTriple(nn.Module):
     def __init__(self, la, gamma, tau, margin, dim, cN, K):
         super(SoftTriple, self).__init__()
-        self.la = la
-        self.gamma = 1./gamma
-        self.tau = tau
-        self.margin = margin
-        self.cN = cN
-        self.K = K
+        self.la = la                # default: 20 (best 17)
+        self.gamma = 1./gamma       # default 0.1 (0.085)
+        self.tau = tau              # default 0.01
+        self.margin = margin        # default 0.01
+        self.cN = cN                # Number of classes
+        self.K = K                  # Centers, default: 10 (best 9)
         self.fc = Parameter(torch.Tensor(dim, cN*K))
         self.weight = torch.zeros(cN*K, cN*K, dtype=torch.bool).cuda()
         for i in range(0, cN):

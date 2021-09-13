@@ -9,9 +9,11 @@ from PIL import Image
 from torchvision import transforms
 from torch.utils import data
 from torchvision import models
+
 # import pycuda.driver as cuda
 # import pycuda.autoinit
 import tensorrt as trt
+from efficientnet_pytorch import EfficientNet
 
 def load_model(model_checkpoint: str) -> nn.Module:
     model = torch.load(model_checkpoint)
@@ -32,16 +34,21 @@ def onnx_export(model: nn.Module, fn: str):
     # switch to evaluation mode
     labels = []
     dummy_input = torch.randn(1, 3, 224, 224)
+    # dummy_input = torch.randn(1, 3, 598, 598)
+    # dummy_input = torch.randn(1, 3, 299, 299)
     dummy_input = dummy_input.cuda(0)
     print(dummy_input.shape)
     # SJH: Needed to export EffNetB7 https://github.com/lukemelas/EfficientNet-PyTorch/issues/91
-    # model.module.set_swish(memory_efficient=False)
+    # model.module.model_ft.set_swish(memory_efficient=False)
     # SJH: use model when not trained with DataParallel iterator
-    # SJH: the EffNet model needs opset 12 but BNInception needs opcode 10
+    # SJH: the EffNetB7 and BNInception needs opcode 10
+    # SJH: BN-Inception requires opcode 9 to convert successfully to TFLite
+    opset=10
+    print('Exporting with opset', opset)
     torch.onnx.export(model.module, dummy_input, fn,
                       verbose=True,
                       input_names=['input'], output_names=['output'],
-                      opset_version=10,
+                      opset_version=opset,
                       export_params=True)
     print('Exported model', fn)
 

@@ -15,6 +15,7 @@ pretrained_settings = {
         'imagenet': {
             # Was ported using python2 (may trigger warning)
             'url': 'http://data.lip6.fr/cadene/pretrainedmodels/bn_inception-52deb4733.pth',
+            'file': '/data/n1_data/bn_inception-52deb4733.pth',
             'input_space': 'BGR',
             'input_size': [3, 224, 224],
             'input_range': [0, 255],
@@ -501,7 +502,8 @@ def bninception(dim=64, pretrained='imagenet'):
     if pretrained is not None:
         settings = pretrained_settings['bninception'][pretrained]
         model_dict = model.state_dict()
-        pretrained_dict = model_zoo.load_url(settings['url'])
+        # pretrained_dict = model_zoo.load_url(settings['url'])
+        pretrained_dict = torch.load(settings['file'])
         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
         model_dict.update(pretrained_dict)
         model.load_state_dict(model_dict)
