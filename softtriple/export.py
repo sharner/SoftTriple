@@ -1,6 +1,4 @@
 import argparse, sys, os, io, time, copy
-import numpy as np
-import pandas as pd
 import torch
 import onnx
 import torch.nn as nn
@@ -33,13 +31,13 @@ def save_torch(model, base_name):
 def onnx_export(model: nn.Module, fn: str):
     # switch to evaluation mode
     labels = []
-    dummy_input = torch.randn(1, 3, 224, 224)
-    # dummy_input = torch.randn(1, 3, 598, 598)
-    # dummy_input = torch.randn(1, 3, 299, 299)
+    # dummy_input = torch.randn(1, 3, 224, 224)
+    dummy_input = torch.randn(1, 3, 598, 598)
+    dummy_input = torch.randn(1, 3, 299, 299)
     dummy_input = dummy_input.cuda(0)
     print(dummy_input.shape)
     # SJH: Needed to export EffNetB7 https://github.com/lukemelas/EfficientNet-PyTorch/issues/91
-    # model.module.model_ft.set_swish(memory_efficient=False)
+    model.module.model_ft.set_swish(memory_efficient=False)
     # SJH: use model when not trained with DataParallel iterator
     # SJH: the EffNetB7 and BNInception needs opcode 10
     # SJH: BN-Inception requires opcode 9 to convert successfully to TFLite
