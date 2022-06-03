@@ -199,7 +199,7 @@ def main():
         if nmi > best_nmi:
             best_nmi = nmi
             print("Saving new best model!")
-            fn = "{}.pth".format(f"best_model_{epoch}_eflite")
+            fn = "{}.pth".format(f"best_model_{epoch}")
             torch.save(model, fn)
             print("Model saved to", fn)
 
@@ -210,7 +210,7 @@ def main():
 
     # Save the model
     print("Saving model!")
-    fn = "{}.pth".format("last_model_eflite")
+    fn = "{}.pth".format("last_model")
     torch.save(model, fn)
     print("Model saved to", fn)
 

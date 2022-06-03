@@ -33,7 +33,7 @@ def onnx_export(model: nn.Module, fn: str):
     labels = []
     # dummy_input = torch.randn(1, 3, 224, 224)
     dummy_input = torch.randn(1, 3, 598, 598)
-    dummy_input = torch.randn(1, 3, 299, 299)
+    # dummy_input = torch.randn(1, 3, 299, 299)
     dummy_input = dummy_input.cuda(0)
     print(dummy_input.shape)
     # SJH: Needed to export EffNetB7 https://github.com/lukemelas/EfficientNet-PyTorch/issues/91

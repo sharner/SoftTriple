@@ -15,7 +15,7 @@ pretrained_settings = {
         'imagenet': {
             # Was ported using python2 (may trigger warning)
             'url': 'http://data.lip6.fr/cadene/pretrainedmodels/bn_inception-52deb4733.pth',
-            'file': '/data/n1_data/bn_inception-52deb4733.pth',
+            'file': '/data/n1_crops_dataset/n1_data/bn_inception-52deb4733.pth',
             'input_space': 'BGR',
             'input_size': [3, 224, 224],
             'input_range': [0, 255],
