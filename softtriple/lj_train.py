@@ -20,9 +20,9 @@ from torchvision import transforms, datasets, models
 
 import torch.nn as nn
 from PIL import Image
-import loss
-import evaluation as eva
-import net
+from . import loss
+from .evaluation import evaluation
+from . import net
 
 
 parser = argparse.ArgumentParser(description='PyTorch Training')
@@ -262,7 +262,7 @@ def validate(test_loader, model, args):
             output = model(input)
             testdata = torch.cat((testdata, output.cpu()), 0)
             testlabel = torch.cat((testlabel, target))
-    nmi, recall = eva.evaluation(
+    nmi, recall = evaluation(
         testdata.numpy(), testlabel.numpy(), [1, 2, 4, 8])
     return nmi, recall
 
