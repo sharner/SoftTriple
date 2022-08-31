@@ -73,12 +73,12 @@ def RGB2BGR(im):
     return Image.merge('RGB', (b, g, r))
 
 
-def make_backbone(dims, backbone):
+def make_backbone(dims, backbone, pretrained=True):
     if "BN-Inception" in backbone:
         # for BN-Inception, default
         model_ft = net.bninception(dims)
     else:
-        model_ft = net.torchwrap(backbone, dims)
+        model_ft = net.torchwrap(backbone, dims, pretrained)
     return model_ft
 
 
@@ -172,6 +172,7 @@ def main():
             batch_size=args.batch_size, shuffle=False,
             num_workers=args.workers, pin_memory=True)
     else:
+        print(testdir)
         test_loader = torch.utils.data.DataLoader(
             datasets.ImageFolder(testdir, transforms.Compose([
                 transforms.Resize(input_dim_resize),

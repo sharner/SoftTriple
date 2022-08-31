@@ -10,10 +10,10 @@ setup(
     ext_modules=[],
     cmdclass={'build_ext': BuildExtension.with_options(no_python_abi_suffix=True)},
     install_requires=[
-        'torch==1.9.0',
-        'torchvision==0.10.0',
+        'torch==1.11.0',
+        'torchvision==0.12.0',
         'natsort==7.1.0',
-        'pyarrow==4.0.1',
+        'pyarrow==9.0.0',
         'efficientnet_pytorch==0.7.1',
         'efficientnet-lite-pytorch==0.1.0',
         'efficientnet-lite0-pytorch-model==0.1.0',

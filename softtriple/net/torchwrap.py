@@ -14,14 +14,14 @@ __all__ = ['TorchWrap', 'torchwrap']
 
 class TorchWrap(nn.Module):
 
-    def __init__(self, backbone, dim=64):
+    def __init__(self, backbone, dim, pretrained):
         super(TorchWrap, self).__init__()
         self.dim = dim
         self.backbone = backbone
         self.model_ft = None
         if self.backbone == "mobilenet":
             self.model_ft = torch.hub.load(
-                'pytorch/vision:v0.8.0', 'mobilenet_v2', pretrained=True)
+                'pytorch/vision:v0.8.0', 'mobilenet_v2', pretrained=pretrained)
             # SJH try this one? https://pytorch.org/tutorials/recipes/model_preparation_ios.html#get-pretrained-and-quantized-mobilenet-v2-model
             # SJH: Is there something magic about their bn-inception model or will inception_v3 work just as well?
             # model_ft = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=True)
@@ -83,6 +83,6 @@ class TorchWrap(nn.Module):
         return x
 
 
-def torchwrap(backbone, dim=64):
-    model = TorchWrap(backbone, dim=dim)
+def torchwrap(backbone, dim, pretrained):
+    model = TorchWrap(backbone, dim, pretrained)
     return model
