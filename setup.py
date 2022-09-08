@@ -21,5 +21,6 @@ setup(
         'efficientnet-lite2-pytorch-model==0.1.0'
     ],
     entry_points = {'console_scripts': ['softtriple=softtriple.lj_train:main']},
+    
     include_package_data=True
 )
