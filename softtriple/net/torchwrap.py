@@ -38,8 +38,13 @@ class TorchWrap(nn.Module):
                 self.model_ft._fc = nn.Linear(num_ftrs, self.dim)
             # Try with efficientnet lite as well: https://github.com/lukemelas/EfficientNet-PyTorch
             if "b7" in self.backbone:
-                self.model_ft = EfficientNet.from_pretrained(
-                    "efficientnet-b7", self.dim)
+                if pretrained:
+                    self.model_ft = EfficientNet.from_pretrained(
+                        "efficientnet-b7", self.dim)
+                else:
+                    print("Creating model from_name")
+                    self.model_ft = EfficientNet.from_name(
+                        "efficientnet-b7")
                 num_ftrs = self.model_ft._fc.in_features
                 self.model_ft._fc = nn.Linear(num_ftrs, self.dim)
                 self.model_ft.set_swish(memory_efficient=False)
