@@ -53,6 +53,13 @@ class TorchWrap(nn.Module):
                     "efficientnet-b0", self.dim)
                 num_ftrs = self.model_ft._fc.in_features
                 self.model_ft._fc = nn.Linear(num_ftrs, self.dim)
+            else:
+                # following https://github.com/google/automl/tree/master/efficientnetv2
+                if pretrained:
+                    self.model_ft = EfficientNet.from_pretrained(self.backbone, self.dim)
+                else:
+                    self.model_ft = EfficientNet.from_name(self.backbone)
+                
         elif 'inceptionv3' in self.backbone:
             # model_ft = torch.hub.load('pytorch/vision:v0.10.0', 'inception_v3', pretrained=True)
             self.model_ft = models.inception_v3(pretrained=True)
