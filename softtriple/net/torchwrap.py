@@ -36,6 +36,8 @@ class TorchWrap(nn.Module):
                 # timm.list_models('*efficientnetv2*', pretrained=True)
                 # tf_efficientnetv2_m to start with.
                 self.model_ft = timm.create_model(self.backbone, pretrained, num_classes=self.dim)
+                # num_in_features = model.get_classifier().in_features
+                # model.fc = nn.Linear(num_in_features, self.dim)
             else:
                 if 'lite' in self.backbone:
                     weights_path = EfficientnetLite2ModelFile.get_model_file_path()
