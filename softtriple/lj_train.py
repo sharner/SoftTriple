@@ -20,9 +20,9 @@ from torchvision import transforms, datasets, models
 
 import torch.nn as nn
 from PIL import Image
-from . import loss
-from .evaluation import evaluation
-from . import net
+from softtriple import loss
+from softtriple.evaluation import evaluation
+from softtriple import net
 
 
 parser = argparse.ArgumentParser(description='PyTorch Training')

@@ -42,7 +42,6 @@ class TorchWrap(nn.Module):
                     self.model_ft = EfficientNet.from_pretrained(
                         "efficientnet-b7", self.dim)
                 else:
-                    print("Creating model from_name")
                     self.model_ft = EfficientNet.from_name(
                         "efficientnet-b7")
                 num_ftrs = self.model_ft._fc.in_features
@@ -61,7 +60,6 @@ class TorchWrap(nn.Module):
         # Default is ResNet50
         else:
             if "18" in self.backbone:
-                print("resnet18")
                 self.model_ft = models.resnet18(pretrained=True)
             elif "101" in self.backbone:
                 self.model_ft = models.resnet101(pretrained=True)
