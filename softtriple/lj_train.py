@@ -201,7 +201,7 @@ def main():
             best_nmi = nmi
             print("Saving new best model!")
             fn = "{}.pth".format(f"best_model_{epoch}")
-            torch.save(model, fn)
+            torch.save(model.state_dict(), fn)
             print("Model saved to", fn)
 
     # evaluate on validation set
@@ -212,7 +212,7 @@ def main():
     # Save the model
     print("Saving model!")
     fn = "{}.pth".format("last_model")
-    torch.save(model, fn)
+    torch.save(model.state_dict(), fn)
     print("Model saved to", fn)
 
 
