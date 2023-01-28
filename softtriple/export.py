@@ -25,7 +25,7 @@ def load_resnet():
 def save_torch(model, base_name):
     print("Saving model!")
     fn = "{}.pth".format(base_name)
-    torch.save(model, fn)
+    torch.save(model.state_dict(), fn)
     print("Model saved to", fn)
 
 def onnx_export(model: nn.Module, fn: str):
