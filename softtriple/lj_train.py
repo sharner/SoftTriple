@@ -20,9 +20,9 @@ from torchvision import transforms, datasets, models
 
 import torch.nn as nn
 from PIL import Image
-from . import loss
-from .evaluation import evaluation
-from . import net
+from softtriple import loss
+from softtriple.evaluation import evaluation
+from softtriple import net
 
 
 parser = argparse.ArgumentParser(description='PyTorch Training')
@@ -201,7 +201,7 @@ def main():
             best_nmi = nmi
             print("Saving new best model!")
             fn = "{}.pth".format(f"best_model_{epoch}")
-            torch.save(model, fn)
+            torch.save(model.state_dict(), fn)
             print("Model saved to", fn)
 
     # evaluate on validation set
@@ -212,7 +212,7 @@ def main():
     # Save the model
     print("Saving model!")
     fn = "{}.pth".format("last_model")
-    torch.save(model, fn)
+    torch.save(model.state_dict(), fn)
     print("Model saved to", fn)
 
 

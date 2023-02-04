@@ -24,6 +24,8 @@ import loss
 import evaluation as eva
 import net
 import export
+from timm.data.auto_augment import rand_augment_transform
+from timm.data.transforms import RandomResizedCropAndInterpolation
 
 
 parser = argparse.ArgumentParser(description='PyTorch Training')
@@ -64,6 +66,8 @@ parser.add_argument('-C', default=98, type=int,
                     help='C')
 parser.add_argument('-K', default=10, type=int,
                     help='K')
+parser.add_argument('--rand_config', default='rand-mstd1',
+                    help='Random augment configuration string')
 
 
 def RGB2BGR(im):
@@ -94,12 +98,14 @@ def main():
     normalize = transforms.Normalize(mean=[104., 117., 128.],
                                      std=[1., 1., 1.])
 
+    rand_tfm = rand_augment_transform(config_str=args.rand_config, hparams={'img_mean': (104, 117, 128)})
     train_dataset = datasets.ImageFolder(
         traindir,
         transforms.Compose([
             transforms.Lambda(RGB2BGR),
-            transforms.RandomResizedCrop(224),
+            RandomResizedCropAndInterpolation(size=224, scale=(0.8, 1)),
             transforms.RandomHorizontalFlip(),
+            rand_tfm,
             transforms.ToTensor(),
             transforms.Lambda(lambda x: x.mul(255)),
             normalize,
