@@ -3,7 +3,7 @@ from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 setup(
     name='softtriple',
-    version='0.0.0',
+    version='0.0.1',
     description='SoftTriple network',
     author = 'Soren Harner',
     packages=['softtriple'],
@@ -13,7 +13,7 @@ setup(
         'torch==1.11.0',
         'torchvision==0.12.0',
         'natsort==7.1.0',
-        'pyarrow==9.0.0',
+        'pyarrow==11.0.0',
         'scikit-learn==1.1.2',
         'efficientnet_pytorch==0.7.1',
         # 'efficientnet-lite-pytorch==0.1.0',
