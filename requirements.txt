@@ -1,0 +1,23 @@
+altair
+duckdb
+efficientnet_pytorch
+google-api-core
+google-cloud-storage
+google-cloud-vision
+grpcio
+gcsfs
+idna
+imutils
+ipyevents
+ipywidgets
+itypes
+# jupyterlab
+mock
+natsort
+# numpy
+pandas
+Pillow
+pyaml
+pyarrow
+redis
+timm
