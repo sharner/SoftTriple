@@ -148,33 +148,18 @@ def main():
         # TODO: investigate this?
         # For EfficientNet with advprop
         # normalize = transforms.Lambda(lambda img: img * 2.0 - 1.0)
-        if args.rand_config:
-            print("Using random augmentation...")
-            # note mean is 255 * (0.485, 0.456, 0.406).  TODO define
-            # mean in one spot to make sure normalize and rand augment
-            # have same mean.
-            rand_tfm = rand_augment_transform(config_str=args.rand_config,
-                                              hparams={'img_mean': (124, 116, 104)})
-            train_dataset = datasets.ImageFolder(
-                traindir,
-                transforms.Compose([
-                    RandomResizedCropAndInterpolation(input_dim_crop),
-                    transforms.RandomHorizontalFlip(),
-                    rand_tfm,
-                    transforms.ToTensor(),
-                    normalize,
-                ]))
-        else:
-            print("Not using random augmentation...")
-            # note mean is 255 * (0.485, 0.456, 0.406).  TODO define
-            train_dataset = datasets.ImageFolder(
-                traindir,
-                transforms.Compose([
-                    transforms.RandomResizedCrop(input_dim_crop),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ToTensor(),
-                    normalize,
-                ]))
+        
+        rand_tfm = rand_augment_transform(config_str=args.rand_config,
+                                          hparams={'img_mean': (124, 116, 104)})
+        train_dataset = datasets.ImageFolder(
+            traindir,
+            transforms.Compose([
+                transforms.RandomResizedCropAndInterpolation(input_dim_crop),
+                transforms.RandomHorizontalFlip(),
+                rand_tfm,
+                transforms.ToTensor(),
+                normalize,
+            ]))
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True,
@@ -211,7 +196,9 @@ def main():
         adjust_learning_rate(optimizer, epoch, args)
 
         # train for one epoch
-        train(train_loader, model, criterion, optimizer, args)
+        if not train(train_loader, model, criterion, optimizer, args):
+            print("Have NaN result. Stopping")
+            return
 
         # Run validation
         nmi, recall = validate(test_loader, model, args)
@@ -240,7 +227,6 @@ def main():
 
 num_avg_iter = 500
 
-
 def train(train_loader, model, criterion, optimizer, args):
     # switch to train mode
 
@@ -251,23 +237,44 @@ def train(train_loader, model, criterion, optimizer, args):
                 m.eval()
 
     run_loss = 0
+    do_continue = True
     for i, (input, target) in enumerate(train_loader):
         if args.gpu is not None:
             input = input.cuda(args.gpu, non_blocking=True)
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
+        if torch.isnan(input).any():
+            print("NaN input: {}".format(torch.isnan(input)))
+            do_continue = False
+        if torch.isnan(target).any():
+            print("NaN target: {}".format(torch.isnan(target)))
+            do_continue = False
+
         output = model(input)
+        if torch.isnan(output).any():
+            print("NaN output: {}".format(torch.isnan(output)))
+            do_continue = False
+
         loss = criterion(output, target)
+        nan_loss = torch.isnan(loss)
+        if nan_loss.any():
+            print("NaN loss: {}".format(nan_loss))
+            do_continue = False
+
         run_loss += loss.item()
         if i % num_avg_iter == 0:
             print('Training loss running avg', run_loss/float(num_avg_iter))
             run_loss = 0
 
+        if not do_continue:
+            break
+
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+    return do_continue
 
 
 def validate(test_loader, model, args):
