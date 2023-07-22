@@ -24,6 +24,8 @@ from softtriple import loss
 from softtriple.evaluation import evaluation
 from softtriple import net
 
+import timm.data.auto_augment
+from timm.data.transforms import RandomResizedCropAndInterpolation
 
 parser = argparse.ArgumentParser(description='PyTorch Training')
 parser.add_argument('data', help='path to dataset')
@@ -65,7 +67,10 @@ parser.add_argument('-K', default=10, type=int,
                     help='centers')
 parser.add_argument('--backbone', default='BN-Inception', type=str,
                     help='type of model to use: "resnet" for Resnet152, "mobilenet" for Mobilenet_v2, "efficientb7" + "efficientb0" for Efficient Net B0 and B7, "efficientlite" for Efficient Net Lite')
-
+parser.add_argument('--rand_config', default='rand-mstd1',
+                    help='Random augment configuration string')
+parser.add_argument('--max_level', default=None, type=float,
+                    help='change rand augmentation max')
 
 def RGB2BGR(im):
     assert im.mode == 'RGB'
@@ -84,6 +89,9 @@ def make_backbone(dims, backbone, pretrained=True):
 
 def main():
     args = parser.parse_args()
+
+    if args.max_level:
+        timm.data.auto_augment._LEVEL_DENOM = args.max_level
 
     # create model
     print("Training model with backbone", args.backbone)
@@ -145,14 +153,34 @@ def main():
         # TODO: investigate this?
         # For EfficientNet with advprop
         # normalize = transforms.Lambda(lambda img: img * 2.0 - 1.0)
-        train_dataset = datasets.ImageFolder(
-            traindir,
-            transforms.Compose([
-                transforms.RandomResizedCrop(input_dim_crop),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                normalize,
-            ]))
+        if args.rand_config:
+            print("Using random augmentation...")
+            # note mean is 255 * (0.485, 0.456, 0.406).  TODO define
+            # mean in one spot to make sure normalize and rand augment
+            # have same mean.
+            rand_tfm = timm.data.auto_augment.rand_augment_transform\
+                (config_str=args.rand_config,
+                 hparams={'img_mean': (124, 116, 104)})
+            train_dataset = datasets.ImageFolder(
+                traindir,
+                transforms.Compose([
+                    RandomResizedCropAndInterpolation(input_dim_crop),
+                    transforms.RandomHorizontalFlip(),
+                    rand_tfm,
+                    transforms.ToTensor(),
+                    normalize,
+                ]))
+        else:
+            print("Not using random augmentation...")
+            # note mean is 255 * (0.485, 0.456, 0.406).  TODO define
+            train_dataset = datasets.ImageFolder(
+                traindir,
+                transforms.Compose([
+                    transforms.RandomResizedCrop(input_dim_crop),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    normalize,
+                ]))
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True,
