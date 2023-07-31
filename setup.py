@@ -12,9 +12,6 @@ setup(
     install_requires=[
         'torch==1.11.0',
         'torchvision==0.12.0',
-        'natsort==7.1.0',
-        'pyarrow==10.0.0',
-        'scikit-learn==1.1.2',
         'efficientnet_pytorch==0.7.1',
         # 'efficientnet-lite-pytorch==0.1.0',
         # 'efficientnet-lite0-pytorch-model==0.1.0',
