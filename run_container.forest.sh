@@ -4,4 +4,6 @@ docker run \
 	--gpus all \
 	--mount type=bind,source="$(pwd)",target=/layerjot/SoftTriple \
 	--mount type=bind,source="/home/data",target=/data \
-	--rm --ipc=host -it softtriple:latest
+	--mount type=bind,source="/home/results",target=/results \
+	--rm --shm-size 2G --network=host -it softtriple:latest
+

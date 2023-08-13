@@ -9,6 +9,7 @@ def evaluation(X, Y, Kset):
     classN = np.max(Y)+1
     kmax = np.max(Kset)
     recallK = np.zeros(len(Kset))
+    print("classN {} kmax {}".format(classN, kmax))
     #compute NMI
     kmeans = KMeans(n_clusters=classN).fit(X)
     nmi = normalized_mutual_info_score(Y, kmeans.labels_, average_method='arithmetic')
