@@ -291,7 +291,7 @@ def train(train_loader, model, criterion, optimizer, args):
         loss = criterion(output, target)
         run_loss += loss.item()
         if i % num_avg_iter == 0:
-            print('Training loss running avg', run_loss/float(num_avg_iter))
+            print('Training loss running avg', float(run_loss) / num_avg_iter)
             run_loss = 0
 
         # compute gradient and do SGD step
