@@ -11,6 +11,7 @@ RUN cd /SoftTriple && \
     pip install --no-cache-dir -e .
 RUN pip install timm altair duckdb
 RUN pip install gcsfs
+RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 # Downloading gcloud package
 RUN curl https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz > /tmp/google-cloud-sdk.tar.gz
